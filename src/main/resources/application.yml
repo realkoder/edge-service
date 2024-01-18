@@ -13,6 +13,13 @@ spring:
 
   cloud:
     gateway:
+      httpclient:
+        connect-timeout: 2000 # Time limit for a connection to be established
+        response-timeout: 5s #  Time limit for a response to be received
+        pool:
+          type: elastic
+          max-idle-time: 15s
+          max-life-time: 60s
       routes:
         - id: catalog-service
           # If the env var isn't defined the first part after : will be used so for this it would be = http://localhost:9001
@@ -24,3 +31,15 @@ spring:
           uri: ${ORDER_SERVICE_URL:http://localhost:9002}/orders
           predicates:
             - Path=/orders/**
+      default-filters:
+        - name: Retry
+          args:
+            retries: 3
+            methods: GET
+            series: SERVER_ERROR # Retries only when 5XX errors
+            exceptions: java.io.IOException, java.util.concurrent.TimeoutException # Retries only when these exceptions thrown
+            backoff:
+              firstBackoff: 50ms
+              maxBackOff: 500ms
+              factor: 2
+              basedOnPreviousValue: false # Retries with a relay computed as "firstBackoff * (factor ^n)"
