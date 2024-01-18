@@ -58,3 +58,26 @@ Figure 9.5 shows how these patterns work together to increase
 the application’s resilience.
 ![](img/applicationsResilience.png)
 The result can be verified by using the tool `Apache Benchmark`.
+
+
+## Request rate limiter
+The implementation of RequestRateLimiter on Redis is based 
+on the token bucket algorithm. 
+Each user is assigned a bucket inside which tokens are dripped 
+over time at a specific rate (the replenish rate). 
+Each bucket has a maximum capacity (the burst capacity). 
+When a user makes a request, a token is removed from its bucket. 
+When there are no more tokens left, the request is not permitted, 
+and the user will have to wait until more tokens have dripped 
+into its bucket.
+To know more about the token bucket algorithm, 
+recommend reading Paul Tarjan’s “Scaling your API with 
+Rate Limiters” article about how they use it to implement rate 
+limiters at Stripe 
+[rate-limiters](https://stripe.com/blog/rate-limiters).
+
+## Redis
+What happens if Redis becomes unavailable? 
+Spring Cloud Gateway has been built with resilience in mind, 
+so it will keep its service level, but the rate limiters 
+would be disabled until Redis is up and running again.
