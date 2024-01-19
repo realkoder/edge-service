@@ -10,8 +10,19 @@ spring:
     name: edge-service
   lifecycle:
     timeout-per-shutdown-phase: 15s
-
+  config:
+    import: "optional:configserver:"
   cloud:
+    config:
+      uri: http://localhost:8888
+      request-connect-timeout: 5000 # 5s
+      request-read-timeout: 5000 # 5s
+      fail-fast: false # In production, set to true
+      retry:
+        max-attempts: 6
+        initial-interval: 1000 # 1s
+        max-interval: 2000 # 2s
+        multiplier: 1.1
     gateway:
       httpclient:
         connect-timeout: 2000 # Time limit for a connection to be established
@@ -21,6 +32,7 @@ spring:
           max-idle-time: 15s
           max-life-time: 60s
       default-filters:
+        - SaveSession # Ensures the session gets saved before forwarding request downstream
         - name: RequestRateLimiter
           args:
             redis-rate-limiter:
@@ -72,6 +84,11 @@ spring:
       host: localhost
       port: 6379
       timeout: 1s
+  session:
+    store-type: redis
+    timeout: 10m # Default is 30 min
+    redis:
+      namespace: polar:edge
 
 resilience4j:
   circuitbreaker:
