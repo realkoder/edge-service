@@ -60,6 +60,14 @@ spring:
               args:
                 name: catalogCircuitBreaker # Name of the circuit breaker
                 fallbackUri: forward:/catalog-fallback # When the circuit is open request is forwarded to this URI
+        - id: home-route
+          uri: ${CATALOG_SERVICE_URL:http://localhost:9001}/home
+          predicates:
+            - Path=/home/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalogCircuitBreaker
         - id: order-route
           uri: ${ORDER_SERVICE_URL:http://localhost:9002}/orders
           predicates:
@@ -68,6 +76,7 @@ spring:
             - name: CircuitBreaker # No fallback is defined for this circuit breaker
               args:
                 name: orderCircuitBreaker
+
 #        - id: catalog-service
 #          # If the env var isn't defined the first part after : will be used so for this it would be = http://localhost:9001
 #          uri: ${CATALOG_SERVICE_URL:http://localhost:9001}/books
