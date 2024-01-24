@@ -81,3 +81,71 @@ What happens if Redis becomes unavailable?
 Spring Cloud Gateway has been built with resilience in mind, 
 so it will keep its service level, but the rate limiters 
 would be disabled until Redis is up and running again.
+
+## Ingress
+An Ingress is an object that “manages external access to the 
+services in a cluster, typically HTTP. Ingress may provide 
+load balancing, SSL termination and name-based 
+virtual hosting” (https://kubernetes.io/docs). 
+An Ingress object acts as an entry point into a 
+Kubernetes cluster and is capable of routing traffic 
+from a single external IP address to multiple 
+services running inside the cluster. 
+We can use an Ingress object to perform load balancing, 
+accept external traffic directed to a specific URL, 
+nd manage the TLS termination to expose the 
+application services via HTTPS.
+Ingress objects don’t accomplish anything by themselves. 
+We use an Ingress object to declare the desired state in 
+terms of routing and TLS termination. 
+The actual component that enforces those rules and routes 
+traffic from outside the cluster to the applications 
+inside is the ingress controller. 
+Since multiple implementations are available, 
+there’s no default ingress controller included in the 
+core Kubernetes distribution— it’s up to you to install one. 
+Ingress controllers are applications that are usually 
+uilt using reverse proxies like NGINX, HAProxy, or Envoy. 
+Some examples are Ambassador Emissary, Contour, and Ingress NGINX.
+In production, the cloud platform or dedicated tools would be used
+to configure an ingress controller. 
+In our local environment, 
+we’ll need some additional configuration to make the routing work. 
+For the Polar Bookshop example, we’ll use Ingress 
+NGINX (https://github.com/kubernetes/ingress-nginx) in 
+both environments.
+
+Start the polar minikube from scratch or execute it if already
+create profile polar:
+```bash
+minikube start --cpus --memory 4g --driver docker --pofile polar
+minikube start --profile polar
+```
+
+Enable the ingress add-on:
+```bash
+minikube addons enable ingress --profile polar
+```
+
+Get information about the different components deployed with
+ingress NGINX:
+```bash
+kubectl get all -n ingress nginx
+```
+The flag -n fetches all objects created in the nginx namespace.
+
+Retrieve the assigned IP-address for the minikube cluster
+run:
+```bash
+minikube ip --profile polar
+```
+The ingress add-on doesn't yet support the use of cluster's IP
+addresses for mac or windows when running on Docker.
+Therefor use the minikube tunnel to expose cluster to local
+environment:
+```bash
+minikube tunnnel --profile polar
+```
+That is similar to `kubectl port-forward` but applies to whole
+cluster not just specific service.
+
