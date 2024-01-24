@@ -130,7 +130,7 @@ minikube addons enable ingress --profile polar
 Get information about the different components deployed with
 ingress NGINX:
 ```bash
-kubectl get all -n ingress nginx
+kubectl get all -n ingress-nginx
 ```
 The flag -n fetches all objects created in the nginx namespace.
 
@@ -149,3 +149,7 @@ minikube tunnnel --profile polar
 That is similar to `kubectl port-forward` but applies to whole
 cluster not just specific service.
 
+Verify that the ingress object has been created correctly:
+```bash
+kubectl get ingress
+```
